@@ -1,11 +1,10 @@
 from flask import Flask, jsonify, request, send_from_directory
 import time
 from solvers.nqueens import min_conflit_steps
-from solvers.sudoku import min_conflict_sudoku, backtrack_sudoku
+from solvers.sudoku import min_conflict_sudoku, backtrack_sudoku, SUDOKU_PUZZLES
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
-# ---------- Pages ----------
 @app.route('/')
 def landing():
     return send_from_directory(app.static_folder, 'landing.html')
@@ -14,7 +13,6 @@ def landing():
 def app_page():
     return send_from_directory(app.static_folder, 'app.html')
 
-# ---------- API ----------
 @app.route('/solve', methods=['POST'])
 def solve():
     data = request.get_json()
@@ -74,6 +72,33 @@ def benchmark():
             'success_rate': succes / essais * 100,
             'avg_time_ms': (temps_total / essais) * 1000,
             'avg_steps': etapes_moy / succes if succes else 0
+        })
+    return jsonify(results)
+
+@app.route('/benchmark-sudoku', methods=['GET'])
+def benchmark_sudoku():
+    method = request.args.get('method', 'backtrack')
+    difficulties = {
+        'easy': SUDOKU_PUZZLES['easy'],
+        'medium': SUDOKU_PUZZLES['medium'],
+        'hard': SUDOKU_PUZZLES['hard'],
+        'expert': SUDOKU_PUZZLES['expert']
+    }
+    results = []
+    for name, grid in difficulties.items():
+        start = time.perf_counter()
+        if method == 'minconf':
+            states = min_conflict_sudoku(grid, timeout=10)
+        else:
+            states = backtrack_sudoku(grid)
+        elapsed = time.perf_counter() - start
+        solved = states[-1].get('solved', False) if states else False
+        steps = len(states) - 1 if states else 0
+        results.append({
+            'difficulty': name,
+            'solved': solved,
+            'time_ms': elapsed * 1000,
+            'steps': steps
         })
     return jsonify(results)
 

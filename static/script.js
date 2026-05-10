@@ -4,7 +4,6 @@ let states = [], currentStep = 0, playInterval = null, backendOnline = false;
 let sudokuInitialGrid = [];
 let sudokuFixedMask = [];
 
-// -------------------- Backend check --------------------
 async function checkBackend() {
     try {
         const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(1500) });
@@ -20,7 +19,6 @@ async function checkBackend() {
 checkBackend();
 setInterval(checkBackend, 4000);
 
-// -------------------- Notation N‑Reines --------------------
 function notation(r, c, n) { return String.fromCharCode(97 + c) + (n - r); }
 
 // ==================== N‑REINES ====================
@@ -78,9 +76,15 @@ function updateQueensInfo() {
 }
 
 function updateQueenTable() {
+    const rightPanel = document.getElementById('rightPanel');
+    rightPanel.innerHTML = `<h3>👑 Suivi des reines</h3>
+        <div class="queen-table-container">
+            <table id="queenTable">
+                <thead><tr><th>Q°</th><th>Position</th><th>Déplacement</th><th>Status</th><th>État</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
     const tbody = document.querySelector('#queenTable tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
     if (!states.length) return;
     const n = Object.keys(states[currentStep].assign).length;
     const assign = states[currentStep].assign;
@@ -199,7 +203,6 @@ function drawSudokuBoard() {
             cell.style.width = '48px'; cell.style.height = '48px';
             if (c % 3 === 2 && c !== 8) cell.classList.add('right-thick');
             if (r % 3 === 2 && r !== 8) cell.classList.add('bottom-thick');
-
             const val = grid[r][c];
             if (val) {
                 cell.textContent = val;
@@ -233,14 +236,19 @@ function updateSudokuInfo() {
 }
 
 function updateSudokuTracking() {
+    const rightPanel = document.getElementById('rightPanel');
+    rightPanel.innerHTML = `<h3>📋 Suivi du jeu</h3>
+        <div class="queen-table-container">
+            <table id="trackingTable">
+                <thead><tr><th>Case</th><th>Init.</th><th>Actuel</th><th>Conflits</th><th>Statut</th><th>État</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
     const tbody = document.querySelector('#trackingTable tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
     if (!states.length) return;
     const grid = states[currentStep].grid;
     const angrySet = new Set(states[currentStep].angry.map(([r,c]) => `${r},${c}`));
     const moved = states[currentStep].moved;
-
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
             if (sudokuFixedMask[r][c]) continue;
@@ -269,9 +277,7 @@ function showSudokuError(msg) {
     const isTimeout = msg.includes('Timeout');
     const cls = isTimeout ? 'error-message timeout-message' : 'error-message';
     document.getElementById('infoPanel').innerHTML = `<div class="${cls}">${msg}</div>`;
-    try {
-        document.querySelector('#trackingTable tbody').innerHTML = '';
-    } catch(e) {}
+    try { document.querySelector('#trackingTable tbody').innerHTML = ''; } catch(e) {}
 }
 
 function updateSudokuGridFromDifficulty() {
@@ -293,85 +299,133 @@ function resetCustomGrid() {
     drawInitialSudokuBoard();
 }
 
-// ==================== MODE TOGGLE ====================
-document.getElementById('toggleModeBtn').addEventListener('click', () => {
-    if (mode === 'queens') {
-        mode = 'sudoku';
-        document.getElementById('queensControls').style.display = 'none';
-        document.getElementById('sudokuControls').style.display = 'flex';
-        document.getElementById('toggleModeBtn').textContent = '♛ Mode N‑Reines';
-        document.getElementById('boardContainer').innerHTML = '';
-        document.getElementById('timeline').style.display = 'none';
-        document.getElementById('infoPanel').innerHTML = '';
-        document.getElementById('rightPanel').innerHTML = `<h3>📋 Suivi du jeu</h3>
-            <div class="queen-table-container">
-                <table id="trackingTable">
-                    <thead><tr><th>Case</th><th>Init.</th><th>Actuel</th><th>Conflits</th><th>Statut</th><th>État</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>`;
-        if (document.getElementById('difficulty').value === 'custom') {
-            document.getElementById('customGridArea').style.display = 'block';
-        }
-        updateSudokuGridFromDifficulty();
-        drawInitialSudokuBoard();
-    } else {
+// ==================== Cyberpunk Panel ====================
+const modeSelect = document.getElementById('modeSelect');
+const queensOptions = document.getElementById('queensOptions');
+const sudokuOptions = document.getElementById('sudokuOptions');
+const difficultySelect = document.getElementById('difficulty');
+const sudokuMethodSelect = document.getElementById('sudokuMethod');
+const sudokuGridInput = document.getElementById('sudokuGridInput');
+const autoBench = document.getElementById('autoBench');
+const playBtn = document.getElementById('playBtn');
+
+modeSelect.addEventListener('change', () => {
+    if (modeSelect.value === 'queens') {
         mode = 'queens';
-        document.getElementById('queensControls').style.display = 'flex';
-        document.getElementById('sudokuControls').style.display = 'none';
-        document.getElementById('toggleModeBtn').textContent = '🧩 Mode Sudoku';
-        document.getElementById('boardContainer').innerHTML = '';
-        document.getElementById('timeline').style.display = 'none';
-        document.getElementById('infoPanel').innerHTML = '';
-        document.getElementById('rightPanel').innerHTML = `<h3>👑 Suivi des reines</h3>
-            <div class="queen-table-container">
-                <table id="queenTable">
-                    <thead><tr><th>Q°</th><th>Position</th><th>Déplacement</th><th>Status</th><th>État</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>`;
+        queensOptions.style.display = 'flex';
+        sudokuOptions.style.display = 'none';
+    } else {
+        mode = 'sudoku';
+        queensOptions.style.display = 'none';
+        sudokuOptions.style.display = 'flex';
+        if (difficultySelect.value === 'custom') {
+            sudokuGridInput.style.display = 'block';
+        } else {
+            sudokuGridInput.style.display = 'none';
+            updateSudokuGridFromDifficulty();
+        }
     }
 });
 
-document.getElementById('difficulty').addEventListener('change', () => {
-    if (document.getElementById('difficulty').value === 'custom') {
-        document.getElementById('customGridArea').style.display = 'block';
+difficultySelect.addEventListener('change', () => {
+    if (difficultySelect.value === 'custom') {
+        sudokuGridInput.style.display = 'block';
         resetCustomGrid();
     } else {
-        document.getElementById('customGridArea').style.display = 'none';
+        sudokuGridInput.style.display = 'none';
         updateSudokuGridFromDifficulty();
-        drawInitialSudokuBoard();
     }
 });
 
-document.getElementById('loadSudokuBtn').addEventListener('click', () => {
-    if (document.getElementById('difficulty').value === 'custom') {
-        const raw = document.getElementById('sudokuGridInput').value;
-        const rows = raw.trim().split('\n');
-        if (rows.length !== 9) { alert("Il faut exactement 9 lignes."); return; }
-        const grid = rows.map(line => line.trim().split(/\s+/).map(Number));
-        if (grid.some(r => r.length !== 9)) { alert("Chaque ligne doit avoir 9 nombres."); return; }
-        sudokuInitialGrid = grid;
-        sudokuFixedMask = grid.map(row => row.map(v => v !== 0));
-        drawInitialSudokuBoard();
-    }
+// ------------------- Benchmark Functions -------------------
+function runQueensBenchmark() {
+    const status = document.getElementById('benchQueensStatus');
+    const loader = document.getElementById('benchLoader');
+    status.textContent = '⏳ Calcul...';
+    loader.style.display = 'block';
+    fetch(`${API}/benchmark`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#benchQueensTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(d => {
+                tbody.innerHTML += `<tr><td>${d.n}</td><td>${d.success_rate.toFixed(1)}</td><td>${d.avg_time_ms.toFixed(2)}</td><td>${d.avg_steps.toFixed(1)}</td></tr>`;
+            });
+            status.textContent = '✅ Terminé';
+        })
+        .catch(() => status.textContent = '❌ Erreur')
+        .finally(() => loader.style.display = 'none');
+}
+
+function runSudokuBenchmark(method = document.getElementById('benchSudokuMethod').value) {
+    const status = document.getElementById('benchSudokuStatus');
+    const loader = document.getElementById('benchLoader');
+    status.textContent = '⏳ Calcul...';
+    loader.style.display = 'block';
+    fetch(`${API}/benchmark-sudoku?method=${method}`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#benchSudokuTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(d => {
+                tbody.innerHTML += `<tr><td>${d.difficulty}</td><td>${d.solved?'Oui':'Non'}</td><td>${d.time_ms.toFixed(2)}</td><td>${d.steps}</td></tr>`;
+            });
+            status.textContent = '✅ Terminé';
+        })
+        .catch(() => status.textContent = '❌ Erreur')
+        .finally(() => loader.style.display = 'none');
+}
+
+document.getElementById('runSudokuBenchBtn').addEventListener('click', () => {
+    runSudokuBenchmark();
 });
 
-// ==================== RÉSOLUTION ====================
-document.getElementById('solveBtn').addEventListener('click', async () => {
-    if (!backendOnline) { alert('Backend hors ligne.'); return; }
+// Benchmark tabs
+document.querySelectorAll('.bench-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.bench-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('benchQueens').style.display = tab === 'queens' ? 'block' : 'none';
+        document.getElementById('benchSudoku').style.display = tab === 'sudoku' ? 'block' : 'none';
+    });
+});
 
-    if (mode === 'queens') {
-        const n = parseInt(document.getElementById('size').value);
-        document.getElementById('loadingIndicator').style.display = 'flex';
-        try {
-            const res = await fetch(`${API}/solve`, {
+// ------------------- PLAY button action -------------------
+playBtn.addEventListener('click', async () => {
+    document.getElementById('loadingIndicator').style.display = 'flex';
+    const benchmarkNeeded = autoBench.checked;
+    if (benchmarkNeeded) {
+        document.getElementById('benchmarkPanel').style.display = 'flex';
+    }
+
+    // --- Messages d'attente ---
+    const waitingDiv = document.getElementById('waitingMessages');
+    waitingDiv.textContent = ''; // on efface les anciens messages
+    let startTime = Date.now();
+    let messageInterval = setInterval(() => {
+        let elapsed = Math.floor((Date.now() - startTime) / 1000);
+        let modeName = modeSelect.value === 'queens' ? 'N‑Reines' : 'Sudoku';
+        let diff = '';
+        if (modeSelect.value === 'sudoku') {
+            diff = difficultySelect.value === 'custom' ? 'personnalisé' : difficultySelect.value;
+            diff = ` (${diff})`;
+        }
+        waitingDiv.textContent = `⏳ Résolution ${modeName}${diff} en cours... ${elapsed}s écoulées`;
+    }, 10000);
+
+    try {
+        if (modeSelect.value === 'queens') {
+            const n = parseInt(document.getElementById('size').value);
+            const solveTask = fetch(`${API}/solve`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ n, max_steps: 500 })
-            });
-            if (!res.ok) throw new Error(`Erreur ${res.status}`);
-            const data = await res.json();
+            }).then(res => res.json());
+
+            if (benchmarkNeeded) runQueensBenchmark();
+
+            const data = await solveTask;
             states = data.states;
             currentStep = 0;
             document.getElementById('timeline').style.display = 'flex';
@@ -381,28 +435,32 @@ document.getElementById('solveBtn').addEventListener('click', async () => {
             document.getElementById('statsContent').innerHTML =
                 `Résolu : ${data.solved ? 'Oui' : 'Non'}<br>Étapes : ${data.steps}<br>Temps : ${(data.time * 1000).toFixed(1)} ms`;
             drawQueensBoard();
-        } catch (err) {
-            document.getElementById('infoPanel').innerHTML = `<span style="color:red;">❌ ${err.message}</span>`;
-        } finally {
-            document.getElementById('loadingIndicator').style.display = 'none';
-        }
+        } else {
+            // Sudoku
+            if (difficultySelect.value === 'custom') {
+                const raw = sudokuGridInput.value;
+                const rows = raw.trim().split('\n');
+                if (rows.length !== 9) { alert("Il faut exactement 9 lignes."); return; }
+                const grid = rows.map(line => line.trim().split(/\s+/).map(Number));
+                if (grid.some(r => r.length !== 9)) { alert("Chaque ligne doit avoir 9 nombres."); return; }
+                sudokuInitialGrid = grid;
+                sudokuFixedMask = grid.map(row => row.map(v => v !== 0));
+            } else {
+                updateSudokuGridFromDifficulty();
+            }
 
-    } else if (mode === 'sudoku') {
-        if (!sudokuInitialGrid.length) { alert('Chargez une grille.'); return; }
-        const method = document.getElementById('sudokuMethod').value;
-        document.getElementById('loadingIndicator').style.display = 'flex';
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 35000);
-        try {
-            const res = await fetch(`${API}/solve-sudoku`, {
+            const method = sudokuMethodSelect.value;
+            const solveTask = fetch(`${API}/solve-sudoku`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ grid: sudokuInitialGrid, method, max_steps: 5000 }),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!res.ok) throw new Error(`Erreur ${res.status}`);
-            const data = await res.json();
+                body: JSON.stringify({ grid: sudokuInitialGrid, method, max_steps: 5000 })
+            }).then(res => res.json());
+
+            if (benchmarkNeeded) {
+                runSudokuBenchmark(method);
+            }
+
+            const data = await solveTask;
             if (data.solved) {
                 states = data.states;
                 currentStep = 0;
@@ -417,30 +475,30 @@ document.getElementById('solveBtn').addEventListener('click', async () => {
                 showSudokuError(`❌ L'heuristique Min‑Conflit n'a pas réussi à résoudre cette grille. Essayez avec le Solveur Pro.`);
                 document.getElementById('timeline').style.display = 'none';
             }
-        } catch (err) {
-            clearTimeout(timeoutId);
-            if (err.name === 'AbortError') {
-                showSudokuError(`⏰ Timeout : l'algorithme Min‑Conflit n'a pas trouvé de solution en 35 secondes.`);
-            } else {
-                showSudokuError(`❌ Erreur : ${err.message}`);
-            }
-        } finally {
-            document.getElementById('loadingIndicator').style.display = 'none';
         }
+    } catch (err) {
+        document.getElementById('infoPanel').innerHTML = `<span style="color:red;">❌ ${err.message}</span>`;
+    } finally {
+        clearInterval(messageInterval);
+        waitingDiv.textContent = '';
+        document.getElementById('loadingIndicator').style.display = 'none';
     }
 });
 
-// ==================== SLIDER / PLAY / END ====================
+// ==================== Timeline controls ====================
 document.getElementById('stepSlider').addEventListener('input', e => {
     currentStep = parseInt(e.target.value);
-    if (mode === 'queens') drawQueensBoard();
-    else drawSudokuBoard();
+    if (mode === 'queens'){
+        drawQueensBoard();
+        document.getElementById('playBtnTimeline').click();}
+    else {drawSudokuBoard();document.getElementById('playBtnTimeline').click();
+}
 });
 
-document.getElementById('playBtn').addEventListener('click', () => {
+document.getElementById('playBtnTimeline').addEventListener('click', () => {
     if (playInterval) {
         clearInterval(playInterval); playInterval = null;
-        document.getElementById('playBtn').textContent = '▶';
+        document.getElementById('playBtnTimeline').textContent = '▶';
     } else {
         playInterval = setInterval(() => {
             if (currentStep < states.length - 1) {
@@ -451,59 +509,18 @@ document.getElementById('playBtn').addEventListener('click', () => {
                 document.getElementById('stepLabel').textContent = `Étape ${currentStep}/${states.length - 1}`;
             } else {
                 clearInterval(playInterval); playInterval = null;
-                document.getElementById('playBtn').textContent = '▶';
+                document.getElementById('playBtnTimeline').textContent = '▶';
             }
         }, 400);
-        document.getElementById('playBtn').textContent = '⏸';
+        document.getElementById('playBtnTimeline').textContent = '⏸';
     }
 });
 
 document.getElementById('endBtn').addEventListener('click', () => {
-    if (playInterval) { clearInterval(playInterval); playInterval = null; document.getElementById('playBtn').textContent = '▶'; }
+    if (playInterval) { clearInterval(playInterval); playInterval = null; document.getElementById('playBtnTimeline').textContent = '▶'; }
     currentStep = states.length - 1;
     if (mode === 'queens') drawQueensBoard();
     else drawSudokuBoard();
     document.getElementById('stepSlider').value = currentStep;
     document.getElementById('stepLabel').textContent = `Étape ${currentStep}/${states.length - 1}`;
-});
-
-// ==================== BENCHMARK ====================
-document.getElementById('benchBtn').addEventListener('click', async () => {
-    if (!backendOnline) { alert('Backend hors ligne.'); return; }
-    document.getElementById('benchOverlay').style.display = 'flex';
-    try {
-        const res = await fetch(`${API}/benchmark`);
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        let html = '<tr><th>N</th><th>Succès %</th><th>Temps ms</th><th>Étapes</th></tr>';
-        data.forEach(d => html += `<tr><td>${d.n}</td><td>${d.success_rate.toFixed(1)}</td><td>${d.avg_time_ms.toFixed(2)}</td><td>${d.avg_steps.toFixed(1)}</td></tr>`);
-        document.getElementById('benchTable').innerHTML = html;
-        const canvas = document.getElementById('benchGraph');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (data.length) {
-                const maxT = Math.max(...data.map(d => d.avg_time_ms));
-                ctx.beginPath();
-                ctx.strokeStyle = '#f38ba8';
-                ctx.lineWidth = 2;
-                data.forEach((d, i) => {
-                    const x = (i / (data.length - 1)) * canvas.width;
-                    const y = canvas.height - (d.avg_time_ms / maxT) * canvas.height;
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                });
-                ctx.stroke();
-                ctx.fillStyle = '#cdd6f4';
-                ctx.font = '10px sans-serif';
-                data.forEach((d, i) => ctx.fillText(d.n, (i / (data.length - 1)) * canvas.width - 10, canvas.height - 5));
-            }
-        }
-    } catch (err) {
-        document.getElementById('benchTable').innerHTML = `<p style="color:red;">Erreur : ${err.message}</p>`;
-    }
-});
-
-document.getElementById('closeBenchBtn').addEventListener('click', () => {
-    document.getElementById('benchOverlay').style.display = 'none';
 });
