@@ -1,0 +1,32 @@
+{
+  "name": "Min-Conflit CSP Solver",
+  "short_name": "Min-Conflit",
+  "description": "Visualisateur interactif et solveur local pour N-Reines et Sudoku (Heuristique Min-Conflit et Backtracking).",
+  "start_url": "app.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#7867ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "res/icons/icon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "res/icons/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "res/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "res/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}

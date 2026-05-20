@@ -3,99 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min‑Conflit – Optimisation par Contraintes</title>
+    <meta name="description" content="Min-Conflit is an ADOMC project that evolved from a CSP visualizer into a Chrome extension, hosted demo, and portfolio-ready case study.">
+    <title>Min-Conflit - CSP Visualizer and Chrome Extension</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="landing.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="dark-mode">
     <div id="particles-js"></div>
     <div class="shooting-star" style="animation-delay: 0s; top: 10%; left: 20%;"></div>
-<div class="shooting-star" style="animation-delay: 5s; top: 30%; left: 60%;"></div>
-<div class="shooting-star" style="animation-delay: 10s; top: 70%; left: 40%;"></div>
-<div class="shooting-star" style="animation-delay: 15s; top: 50%; left: 80%;"></div>
-<div class="shooting-star" style="animation-delay: 20s; top: 90%; left: 10%;"></div>
+    <div class="shooting-star" style="animation-delay: 5s; top: 28%; left: 78%;"></div>
+    <div class="shooting-star" style="animation-delay: 10s; top: 62%; left: 40%;"></div>
+    <div class="shooting-star" style="animation-delay: 14s; top: 48%; left: 60%;"></div>
+
     <nav class="navbar">
         <div class="nav-left">
-            <span class="logo">♟️ Min‑Conflit</span>
+            <span class="logo">Min-Conflit</span>
         </div>
         <div class="nav-links">
-            <a href="#about">À propos</a>
-            <a href="#features">Fonctionnalités</a>
-            <a href="#tech">Technologies</a>
-            <a href="/app" class="cta-btn">Essayer maintenant</a>
+            <a href="#overview">Overview</a>
+            <a href="#features">Features</a>
+            <a href="#extension">Extension</a>
+            <a href="#tech">Tech</a>
+            <button id="installPwaBtn" class="btn-install-nav" style="display: none;">Installer sur Windows</button>
+            <a href="/app" class="cta-btn">Open app</a>
         </div>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
-            <h1>Résolution intelligente de problèmes CSP</h1>
-            <p>Visualisez l'heuristique Min‑Conflit en action sur les N‑Reines et le Sudoku.<br>
-               Démo interactive, analyse pas à pas, et bien plus.</p>
+            <p class="eyebrow">ADOMC project evolution</p>
+            <h1>From CSP visualizer to Chrome extension product</h1>
+            <p>
+                Min-Conflit started as an interactive solver for N-Queens and Sudoku.
+                It now also exists as a local-first Chromium extension, a hosted demo,
+                and a portfolio-ready case study.
+            </p>
             <div class="hero-buttons">
-                <a href="/app" class="btn-primary">🚀 Lancer l'application</a>
-                <a href="https://github.com/rfluciano/projet-min-conflit.git" class="btn-secondary" target="_blank">🌟 Voir sur GitHub</a>
+                <a href="/app" class="btn-primary">Lancer l'application web</a>
+                <button id="heroInstallPwaBtn" class="btn-primary alt-accent" type="button">Télécharger l'App (Windows)</button>
+                <a href="/extension-showcase" class="btn-secondary">Étude de l'extension Chrome</a>
+                <a href="https://github.com/rfluciano/projet-min-conflit.git" class="btn-secondary" target="_blank" rel="noreferrer">Dépôt GitHub</a>
             </div>
         </div>
         <div class="hero-graphic">
-            <img src="res/images/new_hero.png" alt="Illustration" class="hero-image">
+            <img src="res/images/new_hero.png" alt="Project illustration" class="hero-image">
         </div>
     </section>
 
-    <section id="about" class="section">
-        <h2>🧠 Qu’est‑ce que Min‑Conflit ?</h2>
-        <p>Une heuristique de recherche locale pour les problèmes de satisfaction de contraintes (CSP).<br>
-           Plutôt que d’explorer toutes les combinaisons, elle répare itérativement les conflits.</p>
+    <section id="overview" class="section">
+        <h2>What the project demonstrates</h2>
+        <p class="section-copy">
+            The platform visualizes local search and backtracking techniques for constraint satisfaction problems.
+            The latest iteration packages the solver into a Manifest V3 extension while keeping a clean hosted demo path.
+        </p>
     </section>
 
     <section id="features" class="section">
-        <h2>✨ Fonctionnalités</h2>
+        <h2>Interactive features</h2>
         <div class="cards">
-            <div class="card">
-                <div class="icon">♛</div>
-                <h3>N‑Reines</h3>
-                <p>Résolution jusqu’à N=1000, visualisation dynamique des conflits.</p>
-            </div>
-            <div class="card">
-                <div class="icon">🧩</div>
-                <h3>Sudoku</h3>
-                <p>Deux moteurs : Min‑Conflit & Backtracking MRV. Grilles faciles à expert.</p>
-            </div>
-            <div class="card">
-                <div class="icon">📊</div>
-                <h3>Benchmark</h3>
-                <p>Mesurez les performances en temps réel, graphiques intégrés.</p>
-            </div>
-            <div class="card">
-                <div class="icon">🎮</div>
-                <h3>Revue interactive</h3>
-                <p>Rejouez chaque étape, identifiez les blunders, comprenez l’algorithme.</p>
-            </div>
+            <article class="card">
+                <div class="icon">NQ</div>
+                <h3>N-Queens workspace</h3>
+                <p>Run Min-Conflict on boards of different sizes and replay the movement of each queen step by step.</p>
+            </article>
+            <article class="card">
+                <div class="icon">SD</div>
+                <h3>Sudoku workspace</h3>
+                <p>Compare Backtracking and Min-Conflict, use built-in difficulties, or enter a custom grid.</p>
+            </article>
+            <article class="card">
+                <div class="icon">BM</div>
+                <h3>Embedded benchmarks</h3>
+                <p>Measure solver speed and convergence locally to support demonstrations, reports, and coursework.</p>
+            </article>
+            <article class="card">
+                <div class="icon">RP</div>
+                <h3>Replay and tracking</h3>
+                <p>Inspect every move, conflict count, and final outcome through a visual replay timeline.</p>
+            </article>
+        </div>
+    </section>
+
+    <section id="extension" class="section extension-section">
+        <div class="extension-heading">
+            <p class="eyebrow">Chrome extension branch</p>
+            <h2>Store-ready local-first extension</h2>
+            <p class="section-copy">
+                The solver now ships as a Chromium extension designed around Manifest V3 constraints:
+                bundled logic, minimal permissions, no remote hosted code, and a worker-driven UI.
+            </p>
+        </div>
+        <div class="extension-grid">
+            <article class="extension-card">
+                <span class="extension-kicker">Case study</span>
+                <h3>Portfolio narrative</h3>
+                <p>Explore the migration from Flask app to extension product, including architecture and publishing goals.</p>
+                <a href="/extension-showcase">Read the case study</a>
+            </article>
+            <article class="extension-card">
+                <span class="extension-kicker">Live preview</span>
+                <h3>Hosted extension workspace</h3>
+                <p>The extension workspace is also exposed as a hosted web demo, which makes it easier to present publicly.</p>
+                <a href="/extension" target="_blank" rel="noreferrer">Open hosted extension demo</a>
+            </article>
+            <article class="extension-card">
+                <span class="extension-kicker">Policy URL</span>
+                <h3>Public privacy page</h3>
+                <p>A dedicated privacy policy page is already available for the Chrome Web Store form.</p>
+                <a href="/extension-privacy" target="_blank" rel="noreferrer">Open privacy policy</a>
+            </article>
         </div>
     </section>
 
     <section id="tech" class="section">
-        <h2>⚙️ Stack technique</h2>
+        <h2>Technical stack</h2>
         <div class="tech-list">
             <span>Python</span>
             <span>Flask</span>
-            <span>Vanilla JS</span>
-            <span>CSS3 / Grid</span>
-            <span>Matplotlib</span>
-            <span>Algorithmes CSP</span>
+            <span>Vanilla JavaScript</span>
+            <span>Chrome MV3</span>
+            <span>Web Worker</span>
+            <span>CSS Grid</span>
+            <span>CSP algorithms</span>
         </div>
     </section>
 
     <section class="cta-section">
-        <h2>Prêt à explorer ?</h2>
-        <a href="/app" class="btn-primary">▶ Lancer l’application</a>
+        <h2>Prêt à explorer le projet ?</h2>
+        <div class="cta-actions">
+            <a href="/app" class="btn-primary">Lancer l'application web</a>
+            <button id="ctaInstallPwaBtn" class="btn-primary alt-accent" type="button">Télécharger l'App (Windows)</button>
+            <a href="/extension-showcase" class="btn-secondary">Étude de l'extension Chrome</a>
+        </div>
     </section>
 
     <footer>
-        <p>© 2026 – Projet ADOMC – M2 GLBD ENI. Tous droits réservés.</p>
+        <p>Copyright 2026 - ADOMC project - M2 GLBD ENI</p>
         <div class="social-links">
-            <a href="https://github.com/rfluciano/projet-min-conflit.git" target="_blank">GitHub</a>
-            <a href="https://www.linkedin.com/in/luciano-rabearimanana-9bb616288?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank">LinkedIn</a>
+            <a href="https://github.com/rfluciano/projet-min-conflit.git" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="/extension-showcase">Extension case study</a>
+            <a href="/extension-privacy">Privacy policy</a>
         </div>
     </footer>
+
+    <!-- Modal Téléchargement / Alternatives de lancement -->
+    <div id="downloadModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Options d'installation & Lancement</h3>
+                <button id="closeModalBtn" class="modal-close" type="button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-option">
+                    <h4>🖥️ Option A : Installation Native Windows (PWA)</h4>
+                    <p>Cette application est compatible <strong>Progressive Web App</strong>. Vous pouvez l'installer directement sur Windows 10+ via le bouton d'installation qui apparaît dans la barre d'adresse de votre navigateur (Chrome ou Edge), puis la lancer comme un logiciel classique depuis votre menu Démarrer.</p>
+                </div>
+                <div class="modal-option">
+                    <h4>⚡ Option B : Lanceur Windows sans installation</h4>
+                    <p>Double-cliquez simplement sur le fichier <code>Min-Conflit.bat</code> situé à la racine du projet. Il vérifiera l'environnement virtuel Python, installera les dépendances nécessaires et démarrera le serveur local Flask en arrière-plan.</p>
+                </div>
+                <div class="modal-option">
+                    <h4>🐳 Option C : Conteneur Isolé (Docker)</h4>
+                    <p>Lancez l'application dans un environnement isolé et reproductible en exécutant la commande suivante dans votre terminal :<br><br><code>docker compose up --build</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="vendor/particles.js/particles.min.js"></script>
     <script>

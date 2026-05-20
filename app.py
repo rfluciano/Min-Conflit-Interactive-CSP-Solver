@@ -1,9 +1,19 @@
-from flask import Flask, jsonify, request, send_from_directory
+import os
+from flask import Flask, Response, jsonify, request, send_from_directory
 import time
 from solvers.nqueens import min_conflit_steps
 from solvers.sudoku import min_conflict_sudoku, backtrack_sudoku, SUDOKU_PUZZLES
 
 app = Flask(__name__, static_folder='static', static_url_path='')
+EXTENSION_ROOT = os.path.join(app.root_path, 'browser-extension')
+
+def render_extension_document(filename):
+    path = os.path.join(EXTENSION_ROOT, filename)
+    with open(path, 'r', encoding='utf-8') as handle:
+        html = handle.read()
+    if '<head>' in html:
+        html = html.replace('<head>', '<head>\n    <base href="/extension/">', 1)
+    return Response(html, mimetype='text/html')
 
 @app.route('/')
 def landing():
@@ -12,6 +22,30 @@ def landing():
 @app.route('/app')
 def app_page():
     return send_from_directory(app.static_folder, 'app.html')
+
+@app.route('/extension')
+def extension_app():
+    return render_extension_document('app.html')
+
+@app.route('/extension-popup')
+def extension_popup():
+    return render_extension_document('popup.html')
+
+@app.route('/extension/<path:filename>')
+def extension_static(filename):
+    return send_from_directory(EXTENSION_ROOT, filename)
+
+@app.route('/extension-showcase')
+def extension_showcase():
+    return send_from_directory(app.static_folder, 'extension-showcase.html')
+
+@app.route('/extension-privacy')
+def extension_privacy():
+    return send_from_directory(app.static_folder, 'extension-privacy.html')
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'ok'})
 
 @app.route('/solve', methods=['POST'])
 def solve():
@@ -103,5 +137,10 @@ def benchmark_sudoku():
     return jsonify(results)
 
 if __name__ == '__main__':
-    print("Serveur sur http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    host = os.getenv('APP_HOST', '127.0.0.1')
+    port = int(os.getenv('APP_PORT', '5000'))
+    debug = os.getenv('APP_DEBUG', '1').lower() in ('1', 'true', 'yes', 'on')
+    print(f"Serveur sur http://{host}:{port}")
+    # Keep auto-reload in development without relying on Werkzeug's
+    # interactive debugger, which can hang on some Windows/Python setups.
+    app.run(debug=debug, host=host, use_debugger=False, port=port)

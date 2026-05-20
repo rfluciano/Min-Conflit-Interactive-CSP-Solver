@@ -2,43 +2,80 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Min‑Conflit – ADOMC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Workspace local Min-Conflit pour N-Queens et Sudoku avec replay, benchmarks et suivi d'etats.">
+    <title>Min-Conflit Workspace - ADOMC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="dark-mode">
     <div id="particles-js"></div>
-    <header>
-        <a href="/" class="brand-link" aria-label="Retour a l'accueil">
-            <h1>♟️ Heuristique Min‑Conflit</h1>
-        </a>
-        <div id="connectionStatus" class="status offline">🔴 Backend</div>
-    </header>
+    <div class="shooting-star" style="animation-delay: 0s; top: 12%; left: 16%;"></div>
+    <div class="shooting-star" style="animation-delay: 5s; top: 32%; left: 76%;"></div>
+    <div class="shooting-star" style="animation-delay: 10s; top: 64%; left: 42%;"></div>
+    <div class="shooting-star" style="animation-delay: 15s; top: 84%; left: 12%;"></div>
 
-    <!-- Panneau de contrôle cyberpunk -->
-    <div id="controlPanel" class="cyber-control">
-        <div class="cyber-select">
-            <select id="modeSelect">
-                <option value="queens">♛ N‑Reines</option>
-                <option value="sudoku">🧩 Sudoku</option>
-            </select>
-            <div id="queensOptions" class="sub-options">
-                <label>N =</label>
-                <input type="number" id="size" value="10" min="4" max="100">
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="headline">
+                <p class="eyebrow">Local workspace</p>
+                <a href="/" class="brand-link" aria-label="Retour a l'accueil">
+                    <h1>Min-Conflit Solver</h1>
+                </a>
+                <p class="subtitle">
+                    Version web locale avec replay complet, benchmarks embarques et visualisation des solveurs
+                    pour N-Queens et Sudoku.
+                </p>
             </div>
-            <div id="sudokuOptions" class="sub-options" style="display:none;">
-                <select id="difficulty">
-                    <option value="easy">Facile</option>
-                    <option value="medium">Moyen</option>
-                    <option value="hard">Difficile</option>
-                    <option value="expert">Expert</option>
-                    <option value="custom">Perso</option>
-                </select>
-                <select id="sudokuMethod">
-                    <option value="backtrack">Solveur Pro</option>
-                    <option value="minconf">Min‑Conflit</option>
-                </select>
-                <textarea id="sudokuGridInput" rows="3" cols="15" style="display:none;">0 0 0 0 0 0 0 0 0
+            <div class="runtime-column">
+                <div id="connectionStatus" class="status offline">Backend</div>
+                <button id="installPwaBtn" class="btn-install-topbar" style="display: none;">Installer sur Windows</button>
+            </div>
+        </header>
+
+        <section id="controlPanel" class="toolbar card">
+            <div class="toolbar-grid">
+                <label class="field">
+                    <span>Mode</span>
+                    <select id="modeSelect">
+                        <option value="queens">N-Reines</option>
+                        <option value="sudoku">Sudoku</option>
+                    </select>
+                </label>
+
+                <div id="queensOptions" class="field-group">
+                    <label class="field">
+                        <span>Taille N</span>
+                        <input type="number" id="size" value="10" min="4" max="100">
+                    </label>
+                </div>
+
+                <div id="sudokuOptions" class="field-group" style="display:none;">
+                    <label class="field">
+                        <span>Difficulte</span>
+                        <select id="difficulty">
+                            <option value="easy">Facile</option>
+                            <option value="medium">Moyen</option>
+                            <option value="hard">Difficile</option>
+                            <option value="expert">Expert</option>
+                            <option value="custom">Personnalise</option>
+                        </select>
+                    </label>
+
+                    <label class="field">
+                        <span>Methode</span>
+                        <select id="sudokuMethod">
+                            <option value="backtrack">Solveur Pro</option>
+                            <option value="minconf">Min-Conflit</option>
+                        </select>
+                    </label>
+
+                    <label class="field field-textarea">
+                        <span>Grille custom</span>
+                        <textarea id="sudokuGridInput" rows="9" style="display:none;">0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0
@@ -47,111 +84,171 @@
 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0</textarea>
-            </div>
-        </div>
-        <div class="cyber-check">
-            <input type="checkbox" id="autoBench" checked>
-            <label for="autoBench">⚡ Benchmark auto</label>
-        </div>
-        <button id="playBtn" class="cyber-play">▶ PLAY</button>
-    </div>
+                    </label>
+                </div>
 
-    <div class="main-layout">
-        <aside class="left-panel" id="leftPanel">
-            <div class="classification">
-                <h3>📚 Cours ADOMC</h3>
-                <ul class="tree">
-                    <li>Heuristiques / Métaheuristiques
-                        <ul>
-                            <li>Solution unique → <strong class="active">Min‑Conflit</strong></li>
+                <label class="field toggle-field">
+                    <span>Benchmark auto</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="autoBench" checked>
+                        <span class="toggle-ui"></span>
+                    </label>
+                </label>
+
+                <button id="playBtn" class="primary-button" type="button">Lancer</button>
+            </div>
+        </section>
+
+        <div class="main-layout">
+            <aside class="left-panel side-panel" id="leftPanel">
+                <section class="panel-card">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Contexte ADOMC</h2>
+                            <p>Heuristiques, recherche locale et visualisation.</p>
+                        </div>
+                    </div>
+                    <div class="classification">
+                        <ul class="tree">
+                            <li>Heuristiques / Metaheuristiques
+                                <ul>
+                                    <li>Solution unique -> <strong class="active">Min-Conflit</strong></li>
+                                </ul>
+                            </li>
                         </ul>
-                    </li>
-                </ul>
-            </div>
-            <div class="stats">
-                <h4>Stats résolution</h4>
-                <div id="statsContent">En attente...</div>
-            </div>
-            <div class="benchmark-panel" id="benchmarkPanel" style="display:none;">
-                <div class="bench-tabs">
-                    <button class="bench-tab active" data-tab="queens">♛ N‑Reines</button>
-                    <button class="bench-tab" data-tab="sudoku">🧩 Sudoku</button>
-                </div>
-                <div class="bench-tab-content" id="benchQueens">
-                    <div class="bench-table-container">
-                        <table class="bench-table" id="benchQueensTable">
-                            <thead><tr><th>N</th><th>Succès %</th><th>Temps (ms)</th><th>Étapes</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
                     </div>
-                    <div class="bench-status" id="benchQueensStatus">Prêt</div>
-                </div>
-                <div class="bench-tab-content" id="benchSudoku" style="display:none;">
-                    <div class="bench-method-select">
-                        <label>Méthode :</label>
-                        <select id="benchSudokuMethod">
-                            <option value="backtrack">Solveur Pro</option>
-                            <option value="minconf">Min‑Conflit</option>
+                </section>
+
+                <section class="panel-card stats">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Run summary</h2>
+                            <p>Resultats de l'execution courante.</p>
+                        </div>
+                    </div>
+                    <div id="statsContent" class="stats-content">En attente...</div>
+                </section>
+
+                <section class="panel-card benchmark-panel" id="benchmarkPanel" style="display:none;">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Benchmarks</h2>
+                            <p>Mesures locales pour comparer les solveurs.</p>
+                        </div>
+                    </div>
+                    <div class="bench-tabs">
+                        <select id="benchTabSelect" class="bench-dropdown">
+                            <option value="queens">Benchmark N-Reines</option>
+                            <option value="sudoku">Benchmark Sudoku</option>
                         </select>
-                        <button id="runSudokuBenchBtn">Lancer</button>
                     </div>
-                    <div class="bench-table-container">
-                        <table class="bench-table" id="benchSudokuTable">
-                            <thead><tr><th>Difficulté</th><th>Résolu</th><th>Temps (ms)</th><th>Étapes</th></tr></thead>
+
+                    <div class="bench-tab-content" id="benchQueens">
+                        <div class="bench-table-container">
+                            <table class="bench-table" id="benchQueensTable">
+                                <thead>
+                                    <tr><th>N</th><th>Succes %</th><th>Temps (ms)</th><th>Etapes</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="bench-status" id="benchQueensStatus">Pret</div>
+                    </div>
+
+                    <div class="bench-tab-content" id="benchSudoku" style="display:none;">
+                        <div class="bench-method-select">
+                            <label for="benchSudokuMethod">Methode</label>
+                            <select id="benchSudokuMethod">
+                                <option value="backtrack">Solveur Pro</option>
+                                <option value="minconf">Min-Conflit</option>
+                            </select>
+                            <button id="runSudokuBenchBtn" class="ghost-button compact-button" type="button">Lancer</button>
+                        </div>
+                        <div class="bench-table-container">
+                            <table class="bench-table" id="benchSudokuTable">
+                                <thead>
+                                    <tr><th>Difficulte</th><th>Resolu</th><th>Temps (ms)</th><th>Etapes</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="bench-status" id="benchSudokuStatus">Pret</div>
+                    </div>
+
+                    <div class="loader3d" id="benchLoader" style="display:none;">
+                        <div class="cube">
+                            <div class="face front"></div>
+                            <div class="face back"></div>
+                            <div class="face left"></div>
+                            <div class="face right"></div>
+                            <div class="face top"></div>
+                            <div class="face bottom"></div>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="board-area board-card card">
+                <div class="board-head">
+                    <div>
+                        <h2>Workspace</h2>
+                        <p class="board-subtitle">Le solveur web dialogue avec Flask puis rejoue chaque etape localement.</p>
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" class="loading-panel" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>
+                        <strong>Calcul en cours</strong>
+                        <p>Le solveur traite la demande...</p>
+                    </div>
+                </div>
+
+                <div id="boardContainer" class="board-container"></div>
+                <div class="info-panel" id="infoPanel"></div>
+            </main>
+
+            <aside class="right-panel side-panel" id="rightPanel">
+                <section class="panel-card tracking-card">
+                    <div class="panel-head">
+                        <div>
+                            <h2>Tracking</h2>
+                            <p>Suivi des reines ou des cases selon le mode choisi.</p>
+                        </div>
+                    </div>
+                    <div class="queen-table-container">
+                        <table id="queenTable">
+                            <thead>
+                                <tr><th>Q#</th><th>Position</th><th>Deplacement</th><th>Status</th><th>Etat</th></tr>
+                            </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="bench-status" id="benchSudokuStatus">Prêt</div>
-                </div>
-                <div class="loader3d" id="benchLoader" style="display:none;">
-                    <div class="cube">
-                        <div class="face front"></div>
-                        <div class="face back"></div>
-                        <div class="face left"></div>
-                        <div class="face right"></div>
-                        <div class="face top"></div>
-                        <div class="face bottom"></div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="board-area">
-            <div id="boardContainer" class="board-container"></div>
-            <div id="loadingIndicator" class="loading" style="display:none;">
-                <div class="spinner"></div> Calcul...
-            </div>
-            <div class="info-panel" id="infoPanel"></div>
-        </main>
-
-        <aside class="right-panel" id="rightPanel">
-            <h3>👑 Suivi des reines</h3>
-            <div class="queen-table-container">
-                <table id="queenTable">
-                    <thead>
-                        <tr><th>Q°</th><th>Position</th><th>Déplacement</th><th>Status</th><th>État</th></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </aside>
-    </div>
-
-    <!-- Barre de timeline (correcte) -->
-    <div class="timeline" id="timeline" style="display:none;">
-        <input type="range" id="stepSlider" min="0" value="0" step="1">
-        <button id="playBtnTimeline">▶</button>
-        <button id="endBtn">⏩ Fin</button>
-        <span id="stepLabel">Étape 0/0</span>
-        <div id="waitingMessages" style="margin-top:6px; font-size:0.8rem; color:#f5c2e7; text-align:center;">
-
+                </section>
+            </aside>
         </div>
+
+        <section class="timeline card" id="timeline" style="display:none;">
+            <div class="timeline-head">
+                <div>
+                    <h2>Replay</h2>
+                    <span id="stepLabel">Etape 0/0</span>
+                </div>
+                <div class="timeline-actions">
+                    <button id="playBtnTimeline" class="ghost-button" type="button">Play</button>
+                    <button id="endBtn" class="ghost-button" type="button">Fin</button>
+                </div>
+            </div>
+            <input type="range" id="stepSlider" min="0" value="0" step="1">
+            <div id="waitingMessages"></div>
+        </section>
     </div>
 
     <script src="vendor/particles.js/particles.min.js"></script>
     <script>
         particlesJS.load('particles-js', 'vendor/particles.js/particles-config.json');
     </script>
+    <script src="solvers.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

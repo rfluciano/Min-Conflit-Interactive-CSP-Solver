@@ -8,12 +8,17 @@ async function checkBackend() {
     try {
         const r = await fetch(`${API}/`, { signal: AbortSignal.timeout(1500) });
         backendOnline = r.ok;
-        document.getElementById('connectionStatus').innerHTML = backendOnline ? '🟢 Backend' : '🔴 Backend';
-        document.getElementById('connectionStatus').className = 'status ' + (backendOnline ? 'online' : 'offline');
+        if (backendOnline) {
+            document.getElementById('connectionStatus').innerHTML = '🟢 En Ligne (Backend)';
+            document.getElementById('connectionStatus').className = 'status online';
+        } else {
+            document.getElementById('connectionStatus').innerHTML = '⚡ Hors-Ligne (Moteur Local)';
+            document.getElementById('connectionStatus').className = 'status offline-fallback';
+        }
     } catch (e) {
         backendOnline = false;
-        document.getElementById('connectionStatus').innerHTML = '🔴 Backend';
-        document.getElementById('connectionStatus').className = 'status offline';
+        document.getElementById('connectionStatus').innerHTML = '⚡ Hors-Ligne (Moteur Local)';
+        document.getElementById('connectionStatus').className = 'status offline-fallback';
     }
 }
 checkBackend();
@@ -312,12 +317,12 @@ const playBtn = document.getElementById('playBtn');
 modeSelect.addEventListener('change', () => {
     if (modeSelect.value === 'queens') {
         mode = 'queens';
-        queensOptions.style.display = 'flex';
+        queensOptions.style.display = 'grid';
         sudokuOptions.style.display = 'none';
     } else {
         mode = 'sudoku';
         queensOptions.style.display = 'none';
-        sudokuOptions.style.display = 'flex';
+        sudokuOptions.style.display = 'grid';
         if (difficultySelect.value === 'custom') {
             sudokuGridInput.style.display = 'block';
         } else {
@@ -343,6 +348,26 @@ function runQueensBenchmark() {
     const loader = document.getElementById('benchLoader');
     status.textContent = '⏳ Calcul...';
     loader.style.display = 'block';
+
+    if (!backendOnline) {
+        setTimeout(() => {
+            try {
+                const data = window.MinConflitSolvers.benchmarkQueens({ trials: 8 });
+                const tbody = document.querySelector('#benchQueensTable tbody');
+                tbody.innerHTML = '';
+                data.forEach(d => {
+                    tbody.innerHTML += `<tr><td>${d.n}</td><td>${d.successRate.toFixed(1)}</td><td>${d.avgTimeMs.toFixed(2)}</td><td>${d.avgSteps.toFixed(1)}</td></tr>`;
+                });
+                status.textContent = '⚡ Terminé (Local)';
+            } catch (err) {
+                status.textContent = '❌ Erreur';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }, 100);
+        return;
+    }
+
     fetch(`${API}/benchmark`)
         .then(res => res.json())
         .then(data => {
@@ -362,6 +387,26 @@ function runSudokuBenchmark(method = document.getElementById('benchSudokuMethod'
     const loader = document.getElementById('benchLoader');
     status.textContent = '⏳ Calcul...';
     loader.style.display = 'block';
+
+    if (!backendOnline) {
+        setTimeout(() => {
+            try {
+                const data = window.MinConflitSolvers.benchmarkSudoku({ method });
+                const tbody = document.querySelector('#benchSudokuTable tbody');
+                tbody.innerHTML = '';
+                data.forEach(d => {
+                    tbody.innerHTML += `<tr><td>${d.difficulty}</td><td>${d.solved ? 'Oui' : 'Non'}</td><td>${d.timeMs.toFixed(2)}</td><td>${d.steps}</td></tr>`;
+                });
+                status.textContent = '⚡ Terminé (Local)';
+            } catch (err) {
+                status.textContent = '❌ Erreur';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }, 100);
+        return;
+    }
+
     fetch(`${API}/benchmark-sudoku?method=${method}`)
         .then(res => res.json())
         .then(data => {
@@ -380,16 +425,15 @@ document.getElementById('runSudokuBenchBtn').addEventListener('click', () => {
     runSudokuBenchmark();
 });
 
-// Benchmark tabs
-document.querySelectorAll('.bench-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.bench-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
+// Benchmark tabs (Dropdown Selector)
+const benchTabSelect = document.getElementById('benchTabSelect');
+if (benchTabSelect) {
+    benchTabSelect.addEventListener('change', (e) => {
+        const tab = e.target.value;
         document.getElementById('benchQueens').style.display = tab === 'queens' ? 'block' : 'none';
         document.getElementById('benchSudoku').style.display = tab === 'sudoku' ? 'block' : 'none';
     });
-});
+}
 
 // ------------------- PLAY button action -------------------
 playBtn.addEventListener('click', async () => {
@@ -417,15 +461,30 @@ playBtn.addEventListener('click', async () => {
     try {
         if (modeSelect.value === 'queens') {
             const n = parseInt(document.getElementById('size').value);
-            const solveTask = fetch(`${API}/solve`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ n, max_steps: 500 })
-            }).then(res => res.json());
+            let data;
+
+            if (!backendOnline) {
+                // Moteur Local Offline Fallback
+                const res = window.MinConflitSolvers.solveQueensDetailed(n, { maxSteps: 500 });
+                if (!res.ok) throw new Error(res.error || "Erreur de calcul local.");
+                data = {
+                    states: res.states,
+                    solved: res.solved,
+                    steps: res.steps,
+                    time: res.timeMs / 1000
+                };
+            } else {
+                const solveTask = fetch(`${API}/solve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ n, max_steps: 500 })
+                }).then(res => res.json());
+
+                data = await solveTask;
+            }
 
             if (benchmarkNeeded) runQueensBenchmark();
 
-            const data = await solveTask;
             states = data.states;
             currentStep = 0;
             document.getElementById('timeline').style.display = 'flex';
@@ -450,17 +509,36 @@ playBtn.addEventListener('click', async () => {
             }
 
             const method = sudokuMethodSelect.value;
-            const solveTask = fetch(`${API}/solve-sudoku`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ grid: sudokuInitialGrid, method, max_steps: 5000 })
-            }).then(res => res.json());
+            let data;
+
+            if (!backendOnline) {
+                // Moteur Local Offline Fallback
+                const res = method === 'minconf'
+                    ? window.MinConflitSolvers.solveSudokuMinConflict(sudokuInitialGrid, { maxStepsPerTry: 600, maxRestarts: 12, timeoutMs: 4000 })
+                    : window.MinConflitSolvers.solveSudokuBacktracking(sudokuInitialGrid, { captureEvery: 1, maxStates: 5000 });
+                
+                if (!res.ok && res.error) throw new Error(res.error);
+
+                data = {
+                    states: res.states,
+                    solved: res.solved,
+                    steps: res.steps,
+                    time: res.timeMs / 1000
+                };
+            } else {
+                const solveTask = fetch(`${API}/solve-sudoku`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ grid: sudokuInitialGrid, method, max_steps: 5000 })
+                }).then(res => res.json());
+
+                data = await solveTask;
+            }
 
             if (benchmarkNeeded) {
                 runSudokuBenchmark(method);
             }
 
-            const data = await solveTask;
             if (data.solved) {
                 states = data.states;
                 currentStep = 0;
@@ -523,4 +601,45 @@ document.getElementById('endBtn').addEventListener('click', () => {
     else drawSudokuBoard();
     document.getElementById('stepSlider').value = currentStep;
     document.getElementById('stepLabel').textContent = `Étape ${currentStep}/${states.length - 1}`;
+});
+
+// ==================== ENREGISTREMENT PWA SERVICE WORKER ====================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then((reg) => console.log('[PWA Workspace] Service Worker registered with scope:', reg.scope))
+            .catch((err) => console.error('[PWA Workspace] Service Worker registration failed:', err));
+    });
+}
+
+// ==================== GESTION DE L'INSTALLATION PWA (WINDOWS 10+) ====================
+let deferredInstallPromptWorkspace = null;
+const installBtnWorkspace = document.getElementById('installPwaBtn');
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPromptWorkspace = event;
+    if (installBtnWorkspace) {
+        installBtnWorkspace.style.display = 'inline-flex';
+    }
+});
+
+if (installBtnWorkspace) {
+    installBtnWorkspace.addEventListener('click', async () => {
+        if (!deferredInstallPromptWorkspace) return;
+        deferredInstallPromptWorkspace.prompt();
+        const choiceResult = await deferredInstallPromptWorkspace.userChoice;
+        console.log('[PWA Workspace] User response to installation:', choiceResult.outcome);
+        if (choiceResult.outcome === 'accepted') {
+            installBtnWorkspace.style.display = 'none';
+        }
+        deferredInstallPromptWorkspace = null;
+    });
+}
+
+window.addEventListener('appinstalled', (event) => {
+    console.log('[PWA Workspace] App installed successfully!');
+    if (installBtnWorkspace) {
+        installBtnWorkspace.style.display = 'none';
+    }
 });

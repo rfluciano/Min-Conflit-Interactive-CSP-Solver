@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Min-Conflit Solver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <main class="popup-shell">
+        <section class="hero-card">
+            <div class="logo-mark">MC</div>
+            <div>
+                <p class="eyebrow">Chrome extension</p>
+                <h1>Min-Conflit Solver</h1>
+                <p class="summary">Resolve N-Queens et Sudoku en local, sans backend distant.</p>
+            </div>
+        </section>
+
+        <section class="status-card">
+            <div class="status-row">
+                <span class="pill">MV3</span>
+                <span class="pill">Offline-first</span>
+                <span class="pill">No host access</span>
+            </div>
+            <p id="runtimeInfo" class="microcopy">Chargement du contexte...</p>
+        </section>
+
+        <section class="action-stack">
+            <a id="openWorkspaceLink" class="primary-action" href="app.html" target="_blank" rel="noreferrer">
+                Ouvrir le workspace complet
+            </a>
+            <p class="hint">Le solveur tourne localement dans le navigateur et peut servir de demo portfolio.</p>
+        </section>
+
+        <section class="last-run-card">
+            <div class="card-head">
+                <h2>Derniere execution</h2>
+                <span id="versionBadge" class="version-badge">v0.1.0</span>
+            </div>
+            <div id="lastRunSummary" class="run-summary">
+                Aucun calcul encore.
+            </div>
+        </section>
+    </main>
+
+    <script src="popup.js"></script>
+</body>
+</html>

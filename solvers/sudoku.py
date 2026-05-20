@@ -15,15 +15,15 @@ SUDOKU_PUZZLES = {
         [0,0,0,0,8,0,0,7,9]
     ],
     "medium": [
-        [0,0,0,2,6,0,7,0,1],
-        [6,8,0,0,7,0,0,9,0],
-        [1,9,0,0,0,4,5,0,0],
-        [8,2,0,1,0,0,0,4,0],
-        [0,0,4,6,0,2,9,0,0],
-        [0,5,0,0,0,3,0,2,8],
-        [0,0,9,3,0,0,0,7,4],
-        [0,5,0,0,4,0,0,5,0],
-        [7,0,3,0,1,8,0,0,0]
+        [0, 2, 0, 6, 0, 8, 0, 0, 0],
+        [5, 8, 0, 0, 0, 9, 7, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 0],
+        [3, 7, 0, 0, 0, 0, 5, 0, 0],
+        [6, 0, 0, 0, 0, 0, 0, 0, 4],
+        [0, 0, 8, 0, 0, 0, 0, 1, 3],
+        [0, 0, 0, 0, 2, 0, 0, 0, 0],
+        [0, 0, 9, 8, 0, 0, 0, 3, 6],
+        [0, 0, 0, 3, 0, 6, 0, 9, 0]
     ],
     "hard": [
         [0,0,0,6,0,0,4,0,0],
@@ -122,6 +122,7 @@ def min_conflict_sudoku(initial_grid, max_steps_per_try=500, max_restarts=10, ti
     puzzle = copy.deepcopy(initial_grid)
     deadline = time.time() + timeout
     states_all = []
+    cumulative_step = 0
 
     for restart in range(max_restarts):
         if time.time() > deadline:
@@ -133,29 +134,31 @@ def min_conflict_sudoku(initial_grid, max_steps_per_try=500, max_restarts=10, ti
             val = random.randint(1, 9)
             s.assign(r, c, val)
 
-        states = [{
-            'step': 0,
+        states_all.append({
+            'step': cumulative_step,
             'grid': [row[:] for row in s.grid],
             'total_conflicts': s.total_conflicts(),
             'moved': None,
-            'angry': [(r, c) for (r, c) in empty if s.conflicts(r, c, s.grid[r][c]) > 0]
-        }]
+            'angry': [(r, c) for (r, c) in empty if s.conflicts(r, c, s.grid[r][c]) > 0],
+            'solved': False
+        })
+        cumulative_step += 1
 
         for step in range(1, max_steps_per_try + 1):
             if time.time() > deadline:
-                states[-1]['solved'] = False
-                return states_all + states
+                states_all[-1]['solved'] = False
+                return states_all
 
             if s.is_solution():
-                states[-1]['solved'] = True
-                return states_all + states
+                states_all[-1]['solved'] = True
+                return states_all
 
             var = s.worst_variable()
             if not var:
                 if s.is_solution():
-                    states[-1]['solved'] = True
-                    return states_all + states
-                continue
+                    states_all[-1]['solved'] = True
+                    return states_all
+                break
 
             r, c = var
             old_val = s.grid[r][c]
@@ -177,8 +180,8 @@ def min_conflict_sudoku(initial_grid, max_steps_per_try=500, max_restarts=10, ti
             total = s.total_conflicts()
             angry = [(r, c) for (r, c) in empty if s.conflicts(r, c, s.grid[r][c]) > 0]
 
-            states.append({
-                'step': step,
+            states_all.append({
+                'step': cumulative_step,
                 'grid': [row[:] for row in s.grid],
                 'total_conflicts': total,
                 'moved': {
@@ -191,8 +194,7 @@ def min_conflict_sudoku(initial_grid, max_steps_per_try=500, max_restarts=10, ti
                 'angry': angry,
                 'solved': False
             })
-
-        states_all.extend(states)
+            cumulative_step += 1
 
     return states_all
 

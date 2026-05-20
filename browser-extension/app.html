@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Min-Conflit Solver Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="headline">
+                <p class="eyebrow">Offline Chrome workspace</p>
+                <h1>Min-Conflit Solver</h1>
+                <p class="subtitle">
+                    Un workspace local pour visualiser N-Queens et Sudoku en extension Chromium ou en demo portfolio.
+                </p>
+            </div>
+            <div class="runtime-column">
+                <div id="runtimeBadge" class="status-chip">Chargement...</div>
+                <a class="secondary-link" href="popup.html">Ouvrir le popup</a>
+            </div>
+        </header>
+
+        <section class="toolbar card">
+            <div class="toolbar-grid">
+                <label class="field">
+                    <span>Mode</span>
+                    <select id="modeSelect">
+                        <option value="queens">N-Queens</option>
+                        <option value="sudoku">Sudoku</option>
+                    </select>
+                </label>
+
+                <label id="queensSizeField" class="field">
+                    <span>Taille N</span>
+                    <input id="queensSize" type="number" min="4" max="2000" value="12">
+                </label>
+
+                <label id="difficultyField" class="field hidden">
+                    <span>Difficulte</span>
+                    <select id="difficultySelect">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </label>
+
+                <label id="methodField" class="field hidden">
+                    <span>Methode</span>
+                    <select id="methodSelect">
+                        <option value="backtrack">Backtracking</option>
+                        <option value="minconf">Min-Conflict</option>
+                    </select>
+                </label>
+
+                <label class="field toggle-field">
+                    <span>Benchmark local</span>
+                    <label class="toggle">
+                        <input id="benchmarkToggle" type="checkbox" checked>
+                        <span class="toggle-ui"></span>
+                    </label>
+                </label>
+
+                <button id="runButton" class="primary-button" type="button">Run solver</button>
+            </div>
+
+            <label id="customGridField" class="field field-full hidden">
+                <span>Grille custom (9 lignes, 9 valeurs, separateur espace)</span>
+                <textarea id="customGridInput" rows="9"></textarea>
+            </label>
+        </section>
+
+        <section class="workspace-grid">
+            <aside class="side-column">
+                <section class="card">
+                    <div class="section-head">
+                        <div>
+                            <h2>Run summary</h2>
+                            <p>Etat courant de la resolution.</p>
+                        </div>
+                    </div>
+                    <div id="statsPanel" class="metric-grid"></div>
+                </section>
+
+                <section class="card">
+                    <div class="section-head">
+                        <div>
+                            <h2>Benchmarks</h2>
+                            <p>Mesure locale embarquee dans l extension.</p>
+                        </div>
+                    </div>
+                    <div id="benchmarksPanel" class="benchmark-stack"></div>
+                </section>
+            </aside>
+
+            <main class="card board-card">
+                <div class="board-head">
+                    <div>
+                        <h2 id="boardTitle">N-Queens board</h2>
+                        <p id="boardSubtitle">Le solveur tourne dans un worker local pour garder l interface fluide.</p>
+                    </div>
+                    <div id="boardMeta" class="board-meta">Aucune execution</div>
+                </div>
+
+                <div id="loadingPanel" class="loading-panel hidden">
+                    <div class="spinner"></div>
+                    <div>
+                        <strong id="loadingTitle">Calcul en cours</strong>
+                        <p id="loadingMessage">Le solveur travaille localement...</p>
+                    </div>
+                </div>
+
+                <div id="boardHost" class="board-host"></div>
+                <div id="infoPanel" class="info-panel"></div>
+            </main>
+
+            <aside class="side-column">
+                <section class="card">
+                    <div class="section-head">
+                        <div>
+                            <h2>Tracking</h2>
+                            <p>Trace des cases ou reines a chaque etape.</p>
+                        </div>
+                    </div>
+                    <div id="trackingPanel" class="tracking-panel"></div>
+                </section>
+            </aside>
+        </section>
+
+        <section id="timelineCard" class="card timeline-card hidden">
+            <div class="timeline-head">
+                <div>
+                    <h2>Replay</h2>
+                    <p id="stepLabel">Etape 0 / 0</p>
+                </div>
+                <div class="timeline-actions">
+                    <button id="playPauseButton" class="ghost-button" type="button">Play</button>
+                    <button id="lastStepButton" class="ghost-button" type="button">Last step</button>
+                </div>
+            </div>
+            <input id="stepSlider" class="timeline-slider" type="range" min="0" max="0" value="0">
+        </section>
+
+        <footer class="footer-note">
+            Cette page peut etre chargee comme extension unpacked, package Chrome Web Store, ou page de demo sur portfolio.
+        </footer>
+    </div>
+
+    <script src="lib/solvers.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

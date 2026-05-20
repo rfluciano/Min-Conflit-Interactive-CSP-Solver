@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio case study for the Min-Conflit Solver Chromium extension: architecture, hosted demo, privacy policy, and Chrome Web Store preparation.">
+    <title>Min-Conflit Solver Extension - Case Study</title>
+    <link rel="stylesheet" href="extension-showcase.css">
+</head>
+<body class="showcase-body">
+    <div class="showcase-noise"></div>
+
+    <header class="showcase-topbar">
+        <a class="topbar-brand" href="/">Min-Conflit</a>
+        <nav class="topbar-links">
+            <a href="#overview">Overview</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#demo">Demo</a>
+            <a href="#publish">Publish</a>
+        </nav>
+    </header>
+
+    <main class="showcase-shell">
+        <section class="hero-panel">
+            <div class="hero-copy">
+                <p class="eyebrow">Chrome extension case study</p>
+                <h1>Min-Conflit Solver for Chromium</h1>
+                <p class="hero-text">
+                    A local-first Manifest V3 extension that visualizes N-Queens and Sudoku solving
+                    without a remote backend. The same product now works as a browser extension,
+                    a hosted portfolio demo, and a clean Chrome Web Store submission candidate.
+                </p>
+                <div class="hero-actions">
+                    <a class="primary-link" href="/extension" target="_blank" rel="noreferrer">Open full workspace</a>
+                    <a class="secondary-link" href="/extension-popup" target="_blank" rel="noreferrer">Preview popup</a>
+                </div>
+            </div>
+
+            <aside class="hero-stats">
+                <article class="stat-card">
+                    <span class="stat-label">Manifest</span>
+                    <strong>MV3</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Permissions</span>
+                    <strong>storage only</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Execution</span>
+                    <strong>Offline-first</strong>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Remote code</span>
+                    <strong>None</strong>
+                </article>
+            </aside>
+        </section>
+
+        <section id="overview" class="content-section">
+            <div class="section-heading">
+                <p class="eyebrow">Project framing</p>
+                <h2>What changed from the original app</h2>
+            </div>
+            <div class="story-grid">
+                <article class="story-card">
+                    <h3>From Flask app to packaged extension</h3>
+                    <p>
+                        The original project was a Flask visualizer. For Chrome Web Store publishing,
+                        the solving logic was ported to bundled JavaScript so the extension can run locally
+                        and stay compliant with Manifest V3 rules on remote hosted code.
+                    </p>
+                </article>
+                <article class="story-card">
+                    <h3>One codebase, three surfaces</h3>
+                    <p>
+                        The workspace now runs as a Chromium extension, as a hosted demo through the Flask app,
+                        and as a portfolio case study with public privacy and publication material.
+                    </p>
+                </article>
+                <article class="story-card">
+                    <h3>Review-friendly design</h3>
+                    <p>
+                        The package requests only local storage, uses no host permissions, and does not inject
+                        code into websites. That makes the intent narrow, easier to explain, and safer to review.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section id="architecture" class="content-section">
+            <div class="section-heading">
+                <p class="eyebrow">Technical choices</p>
+                <h2>Architecture highlights</h2>
+            </div>
+            <div class="architecture-grid">
+                <article class="architecture-card">
+                    <h3>Local solver engine</h3>
+                    <p>
+                        The Python N-Queens and Sudoku logic was translated into a browser-ready solver module,
+                        keeping the extension self-contained for store review.
+                    </p>
+                </article>
+                <article class="architecture-card">
+                    <h3>Worker-based computation</h3>
+                    <p>
+                        Long-running steps are offloaded to a Web Worker, so the interface remains responsive
+                        during solving and benchmarking.
+                    </p>
+                </article>
+                <article class="architecture-card">
+                    <h3>Portfolio-ready routing</h3>
+                    <p>
+                        The Flask app now exposes clean routes for the extension workspace, popup preview,
+                        case-study page, and privacy policy.
+                    </p>
+                </article>
+                <article class="architecture-card">
+                    <h3>Publication assets</h3>
+                    <p>
+                        The repository now includes packaging scripts, generated icons, store listing copy,
+                        and a privacy policy draft.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-heading">
+                <p class="eyebrow">Visual material</p>
+                <h2>Portfolio-ready project views</h2>
+                <p class="section-note">
+                    These visuals are available immediately for the case study while the dedicated Chrome Store screenshots
+                    are captured manually or on a machine with a stable headless GPU setup.
+                </p>
+            </div>
+            <div class="gallery-grid">
+                <figure class="gallery-card">
+                    <img src="res/images/langing-page.png" alt="Landing page preview for the Min-Conflit project">
+                    <figcaption>Landing and project framing surface</figcaption>
+                </figure>
+                <figure class="gallery-card">
+                    <img src="res/images/N-queens_platform.png" alt="N-Queens interactive workspace preview">
+                    <figcaption>N-Queens replay and board tracking</figcaption>
+                </figure>
+                <figure class="gallery-card">
+                    <img src="res/images/sudoku_platform.png" alt="Sudoku interactive workspace preview">
+                    <figcaption>Sudoku mode with solver and tracking panels</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section id="demo" class="content-section">
+            <div class="section-heading">
+                <p class="eyebrow">Live demo</p>
+                <h2>Hosted extension workspace preview</h2>
+                <p class="section-note">
+                    This embedded view uses the same extension workspace files that are packaged for Chromium.
+                </p>
+            </div>
+            <div class="demo-frame-shell">
+                <iframe
+                    class="demo-frame"
+                    src="/extension"
+                    title="Min-Conflit Solver extension workspace preview"
+                    loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <section id="publish" class="content-section">
+            <div class="section-heading">
+                <p class="eyebrow">Publication path</p>
+                <h2>Chrome Web Store and portfolio readiness</h2>
+            </div>
+            <div class="publish-grid">
+                <article class="publish-card">
+                    <h3>Store submission package</h3>
+                    <p>
+                        A zip package is generated from the extension runtime only, keeping tests and authoring docs
+                        out of the upload artifact.
+                    </p>
+                </article>
+                <article class="publish-card">
+                    <h3>Privacy policy URL</h3>
+                    <p>
+                        A public privacy policy page is available for the Chrome Web Store form and for visitors
+                        evaluating the project.
+                    </p>
+                </article>
+                <article class="publish-card">
+                    <h3>Portfolio story</h3>
+                    <p>
+                        The project can now be presented as a product case study: original app, extension migration,
+                        UX decisions, platform constraints, and final packaging.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="callout-panel">
+            <div>
+                <p class="eyebrow">Next external step</p>
+                <h2>Upload the packaged zip, add screenshots, and link this page from your portfolio.</h2>
+            </div>
+            <div class="callout-links">
+                <a class="primary-link" href="/extension-privacy" target="_blank" rel="noreferrer">Open privacy policy</a>
+                <a class="secondary-link" href="https://developer.chrome.com/docs/webstore/publish" target="_blank" rel="noreferrer">Store publishing guide</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

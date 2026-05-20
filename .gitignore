@@ -1,0 +1,42 @@
+# ====================================================================
+# MIN-CONFLICT INTERACTIVE CSP SOLVER - PROFESSIONAL GITIGNORE
+# ====================================================================
+
+# Python Virtual Environments
+Include/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+pip-selfcheck.json
+
+# Python Cache & Compiled Files
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Large Binary Files & Archives (exceeds GitHub limits)
+docker-images/min-conflit-portable.tar
+**/*.tar
+**/*.zip
+
+# Build & Distribution Artifacts
+build/
+dist/
+*.egg-info/
+min_conflit.egg-info/
+
+# IDE & Tool Directories
+.vscode/
+.sixth/
+.idea/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Operating System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
