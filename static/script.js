@@ -313,134 +313,95 @@ const sudokuMethodSelect = document.getElementById('sudokuMethod');
 const sudokuGridInput = document.getElementById('sudokuGridInput');
 const autoBench = document.getElementById('autoBench');
 const playBtn = document.getElementById('playBtn');
+const openBenchmarkBtn = document.getElementById('openBenchmarkBtn');
+const stepSlider = document.getElementById('stepSlider');
+const playBtnTimeline = document.getElementById('playBtnTimeline');
+const endBtn = document.getElementById('endBtn');
+const benchOverlay = document.getElementById('benchOverlay');
+const benchTable = document.getElementById('benchTable');
+const closeBenchBtn = document.getElementById('closeBenchBtn');
 
-modeSelect.addEventListener('change', () => {
+function bindIfPresent(element, event, handler) {
+    if (element) {
+        element.addEventListener(event, handler);
+    }
+}
+
+function openBenchmarkOverlay() {
+    if (!benchOverlay) return;
+    benchOverlay.style.display = 'flex';
+    runBenchmarkFetch();
+}
+
+function closeBenchmarkOverlay() {
+    if (!benchOverlay) return;
+    benchOverlay.style.display = 'none';
+}
+
+bindIfPresent(openBenchmarkBtn, 'click', openBenchmarkOverlay);
+bindIfPresent(closeBenchBtn, 'click', closeBenchmarkOverlay);
+
+bindIfPresent(modeSelect, 'change', () => {
     if (modeSelect.value === 'queens') {
         mode = 'queens';
-        queensOptions.style.display = 'grid';
-        sudokuOptions.style.display = 'none';
+        if (queensOptions) queensOptions.style.display = 'grid';
+        if (sudokuOptions) sudokuOptions.style.display = 'none';
     } else {
         mode = 'sudoku';
-        queensOptions.style.display = 'none';
-        sudokuOptions.style.display = 'grid';
-        if (difficultySelect.value === 'custom') {
-            sudokuGridInput.style.display = 'block';
+        if (queensOptions) queensOptions.style.display = 'none';
+        if (sudokuOptions) sudokuOptions.style.display = 'grid';
+        if (difficultySelect && difficultySelect.value === 'custom') {
+            if (sudokuGridInput) sudokuGridInput.style.display = 'block';
         } else {
-            sudokuGridInput.style.display = 'none';
+            if (sudokuGridInput) sudokuGridInput.style.display = 'none';
             updateSudokuGridFromDifficulty();
         }
     }
 });
 
-difficultySelect.addEventListener('change', () => {
+bindIfPresent(difficultySelect, 'change', () => {
     if (difficultySelect.value === 'custom') {
-        sudokuGridInput.style.display = 'block';
+        if (sudokuGridInput) sudokuGridInput.style.display = 'block';
         resetCustomGrid();
     } else {
-        sudokuGridInput.style.display = 'none';
+        if (sudokuGridInput) sudokuGridInput.style.display = 'none';
         updateSudokuGridFromDifficulty();
     }
 });
 
-// ------------------- Benchmark Functions -------------------
-function runQueensBenchmark() {
-    const status = document.getElementById('benchQueensStatus');
-    const loader = document.getElementById('benchLoader');
-    status.textContent = '⏳ Calcul...';
-    loader.style.display = 'block';
+// Benchmark overlay logic restored to the original Min-Conflit experience.
+// This handles opening the benchmark overlay and fetching results directly.
+
+async function runBenchmarkFetch() {
+    if (!benchTable) return;
+
+    benchTable.innerHTML = '<tr><th>N</th><th>Succès %</th><th>Temps (ms)</th><th>Étapes</th></tr>';
 
     if (!backendOnline) {
-        setTimeout(() => {
-            try {
-                const data = window.MinConflitSolvers.benchmarkQueens({ trials: 8 });
-                const tbody = document.querySelector('#benchQueensTable tbody');
-                tbody.innerHTML = '';
-                data.forEach(d => {
-                    tbody.innerHTML += `<tr><td>${d.n}</td><td>${d.successRate.toFixed(1)}</td><td>${d.avgTimeMs.toFixed(2)}</td><td>${d.avgSteps.toFixed(1)}</td></tr>`;
-                });
-                status.textContent = '⚡ Terminé (Local)';
-            } catch (err) {
-                status.textContent = '❌ Erreur';
-            } finally {
-                loader.style.display = 'none';
-            }
-        }, 100);
+        benchTable.innerHTML += '<tr><td colspan="4" style="color:#ef4444; text-align:center;">Backend hors ligne. Impossible de lancer le benchmark.</td></tr>';
         return;
     }
 
-    fetch(`${API}/benchmark`)
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector('#benchQueensTable tbody');
-            tbody.innerHTML = '';
-            data.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d.n}</td><td>${d.success_rate.toFixed(1)}</td><td>${d.avg_time_ms.toFixed(2)}</td><td>${d.avg_steps.toFixed(1)}</td></tr>`;
-            });
-            status.textContent = '✅ Terminé';
-        })
-        .catch(() => status.textContent = '❌ Erreur')
-        .finally(() => loader.style.display = 'none');
-}
-
-function runSudokuBenchmark(method = document.getElementById('benchSudokuMethod').value) {
-    const status = document.getElementById('benchSudokuStatus');
-    const loader = document.getElementById('benchLoader');
-    status.textContent = '⏳ Calcul...';
-    loader.style.display = 'block';
-
-    if (!backendOnline) {
-        setTimeout(() => {
-            try {
-                const data = window.MinConflitSolvers.benchmarkSudoku({ method });
-                const tbody = document.querySelector('#benchSudokuTable tbody');
-                tbody.innerHTML = '';
-                data.forEach(d => {
-                    tbody.innerHTML += `<tr><td>${d.difficulty}</td><td>${d.solved ? 'Oui' : 'Non'}</td><td>${d.timeMs.toFixed(2)}</td><td>${d.steps}</td></tr>`;
-                });
-                status.textContent = '⚡ Terminé (Local)';
-            } catch (err) {
-                status.textContent = '❌ Erreur';
-            } finally {
-                loader.style.display = 'none';
-            }
-        }, 100);
-        return;
+    try {
+        const res = await fetch(`${API}/benchmark`);
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        data.forEach(d => {
+            benchTable.innerHTML += `<tr><td>${d.n}</td><td>${d.success_rate.toFixed(1)}%</td><td>${d.avg_time_ms.toFixed(2)}</td><td>${d.avg_steps.toFixed(1)}</td></tr>`;
+        });
+    } catch (err) {
+        benchTable.innerHTML = `<tr><td colspan="4" style="color:#ef4444; text-align:center;">Erreur : ${err.message}</td></tr>`;
+        console.error('Benchmark fetch error:', err);
     }
-
-    fetch(`${API}/benchmark-sudoku?method=${method}`)
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector('#benchSudokuTable tbody');
-            tbody.innerHTML = '';
-            data.forEach(d => {
-                tbody.innerHTML += `<tr><td>${d.difficulty}</td><td>${d.solved?'Oui':'Non'}</td><td>${d.time_ms.toFixed(2)}</td><td>${d.steps}</td></tr>`;
-            });
-            status.textContent = '✅ Terminé';
-        })
-        .catch(() => status.textContent = '❌ Erreur')
-        .finally(() => loader.style.display = 'none');
-}
-
-document.getElementById('runSudokuBenchBtn').addEventListener('click', () => {
-    runSudokuBenchmark();
-});
-
-// Benchmark tabs (Dropdown Selector)
-const benchTabSelect = document.getElementById('benchTabSelect');
-if (benchTabSelect) {
-    benchTabSelect.addEventListener('change', (e) => {
-        const tab = e.target.value;
-        document.getElementById('benchQueens').style.display = tab === 'queens' ? 'block' : 'none';
-        document.getElementById('benchSudoku').style.display = tab === 'sudoku' ? 'block' : 'none';
-    });
 }
 
 // ------------------- PLAY button action -------------------
-playBtn.addEventListener('click', async () => {
-    document.getElementById('loadingIndicator').style.display = 'flex';
-    const benchmarkNeeded = autoBench.checked;
+bindIfPresent(playBtn, 'click', async () => {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'flex';
+    const benchmarkNeeded = autoBench ? autoBench.checked : false;
     if (benchmarkNeeded) {
-        document.getElementById('benchmarkPanel').style.display = 'flex';
+        openBenchmarkOverlay();
     }
 
     // --- Messages d'attente ---
@@ -483,7 +444,6 @@ playBtn.addEventListener('click', async () => {
                 data = await solveTask;
             }
 
-            if (benchmarkNeeded) runQueensBenchmark();
 
             states = data.states;
             currentStep = 0;
@@ -535,9 +495,6 @@ playBtn.addEventListener('click', async () => {
                 data = await solveTask;
             }
 
-            if (benchmarkNeeded) {
-                runSudokuBenchmark(method);
-            }
 
             if (data.solved) {
                 states = data.states;
@@ -564,43 +521,52 @@ playBtn.addEventListener('click', async () => {
 });
 
 // ==================== Timeline controls ====================
-document.getElementById('stepSlider').addEventListener('input', e => {
+bindIfPresent(stepSlider, 'input', e => {
     currentStep = parseInt(e.target.value);
-    if (mode === 'queens'){
+    if (mode === 'queens') {
         drawQueensBoard();
-        document.getElementById('playBtnTimeline').click();}
-    else {drawSudokuBoard();document.getElementById('playBtnTimeline').click();
-}
+    } else {
+        drawSudokuBoard();
+    }
+    if (playBtnTimeline) playBtnTimeline.click();
 });
 
-document.getElementById('playBtnTimeline').addEventListener('click', () => {
+bindIfPresent(playBtnTimeline, 'click', () => {
     if (playInterval) {
-        clearInterval(playInterval); playInterval = null;
-        document.getElementById('playBtnTimeline').textContent = '▶';
+        clearInterval(playInterval);
+        playInterval = null;
+        if (playBtnTimeline) playBtnTimeline.textContent = '▶';
     } else {
         playInterval = setInterval(() => {
             if (currentStep < states.length - 1) {
                 currentStep++;
                 if (mode === 'queens') drawQueensBoard();
                 else drawSudokuBoard();
-                document.getElementById('stepSlider').value = currentStep;
-                document.getElementById('stepLabel').textContent = `Étape ${currentStep}/${states.length - 1}`;
+                if (stepSlider) stepSlider.value = currentStep;
+                const label = document.getElementById('stepLabel');
+                if (label) label.textContent = `Étape ${currentStep}/${states.length - 1}`;
             } else {
-                clearInterval(playInterval); playInterval = null;
-                document.getElementById('playBtnTimeline').textContent = '▶';
+                clearInterval(playInterval);
+                playInterval = null;
+                if (playBtnTimeline) playBtnTimeline.textContent = '▶';
             }
         }, 400);
-        document.getElementById('playBtnTimeline').textContent = '⏸';
+        if (playBtnTimeline) playBtnTimeline.textContent = '⏸';
     }
 });
 
-document.getElementById('endBtn').addEventListener('click', () => {
-    if (playInterval) { clearInterval(playInterval); playInterval = null; document.getElementById('playBtnTimeline').textContent = '▶'; }
+bindIfPresent(endBtn, 'click', () => {
+    if (playInterval) {
+        clearInterval(playInterval);
+        playInterval = null;
+        if (playBtnTimeline) playBtnTimeline.textContent = '▶';
+    }
     currentStep = states.length - 1;
     if (mode === 'queens') drawQueensBoard();
     else drawSudokuBoard();
-    document.getElementById('stepSlider').value = currentStep;
-    document.getElementById('stepLabel').textContent = `Étape ${currentStep}/${states.length - 1}`;
+    if (stepSlider) stepSlider.value = currentStep;
+    const label = document.getElementById('stepLabel');
+    if (label) label.textContent = `Étape ${currentStep}/${states.length - 1}`;
 });
 
 // ==================== ENREGISTREMENT PWA SERVICE WORKER ====================
