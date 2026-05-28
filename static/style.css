@@ -207,9 +207,9 @@ h1 {
 
 .toolbar-grid {
     display: grid;
-    grid-template-columns: 190px minmax(180px, 220px) minmax(320px, 1fr) 120px 140px;
+    grid-template-columns: 190px minmax(200px, 1fr) auto auto;
     gap: var(--space-3);
-    align-items: start;
+    align-items: end;
 }
 
 .field,
@@ -223,12 +223,30 @@ h1 {
 }
 
 .field-group#sudokuOptions {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    grid-column: 2 / 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
     gap: var(--space-3);
 }
 
 .field-group#sudokuOptions .field-textarea {
     grid-column: 1 / -1;
+    margin-top: var(--space-1);
+}
+
+.field-group#sudokuOptions textarea {
+    min-height: 180px;
+    background: rgba(16, 18, 22, 0.95);
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.field-group#sudokuOptions textarea:focus {
+    border-color: rgba(120, 240, 176, 0.3);
+    box-shadow: 0 0 0 3px rgba(120, 240, 176, 0.1);
 }
 
 .field span {
@@ -598,6 +616,7 @@ textarea:focus {
 #trackingTable,
 .bench-table {
     width: 100%;
+    min-height: 500px;
     border-collapse: collapse;
     font-size: 0.88rem;
 }
@@ -652,6 +671,30 @@ textarea:focus {
 .benchmark-panel {
     display: grid;
     gap: var(--space-3);
+}
+
+/* Add spacing between stacked cards in the left panel (Contexte, Run summary, Benchmark) */
+.left-panel .panel-card {
+    margin-bottom: var(--space-3);
+}
+
+.benchmark-layout {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.benchmark-layout-header {
+    text-align: center;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bench-table-small {
+    width: 30%;
+    margin: 0 auto;
 }
 
 .bench-tabs {

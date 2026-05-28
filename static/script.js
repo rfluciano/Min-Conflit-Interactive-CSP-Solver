@@ -309,13 +309,14 @@ const modeSelect = document.getElementById('modeSelect');
 const queensOptions = document.getElementById('queensOptions');
 const sudokuOptions = document.getElementById('sudokuOptions');
 const difficultySelect = document.getElementById('difficulty');
+const customGridContainer = document.getElementById('customGridContainer');
 const sudokuMethodSelect = document.getElementById('sudokuMethod');
 const sudokuGridInput = document.getElementById('sudokuGridInput');
 const autoBench = document.getElementById('autoBench');
 const playBtn = document.getElementById('playBtn');
 
-modeSelect.addEventListener('change', () => {
-    if (modeSelect.value === 'queens') {
+modeSelect.addEventListener('change', (e) => {
+    if (e.target.value === 'queens') {
         mode = 'queens';
         queensOptions.style.display = 'grid';
         sudokuOptions.style.display = 'none';
@@ -324,20 +325,20 @@ modeSelect.addEventListener('change', () => {
         queensOptions.style.display = 'none';
         sudokuOptions.style.display = 'grid';
         if (difficultySelect.value === 'custom') {
-            sudokuGridInput.style.display = 'block';
+            customGridContainer.style.display = 'grid';
         } else {
-            sudokuGridInput.style.display = 'none';
+            customGridContainer.style.display = 'none';
             updateSudokuGridFromDifficulty();
         }
     }
 });
 
-difficultySelect.addEventListener('change', () => {
-    if (difficultySelect.value === 'custom') {
-        sudokuGridInput.style.display = 'block';
+difficultySelect.addEventListener('change', (e) => {
+    if (e.target.value === 'custom') {
+        customGridContainer.style.display = 'grid';
         resetCustomGrid();
     } else {
-        sudokuGridInput.style.display = 'none';
+        customGridContainer.style.display = 'none';
         updateSudokuGridFromDifficulty();
     }
 });

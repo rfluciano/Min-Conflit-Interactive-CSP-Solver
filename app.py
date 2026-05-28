@@ -138,7 +138,7 @@ def benchmark_sudoku():
 
 if __name__ == '__main__':
     host = os.getenv('APP_HOST', '127.0.0.1')
-    port = int(os.getenv('APP_PORT', '5000'))
+    port = int(os.getenv('APP_PORT', '8000'))
     debug = os.getenv('APP_DEBUG', '1').lower() in ('1', 'true', 'yes', 'on')
     print(f"Serveur sur http://{host}:{port}")
     # Keep auto-reload in development without relying on Werkzeug's

@@ -73,17 +73,19 @@
                         </select>
                     </label>
 
-                    <label class="field field-textarea">
+                    <label class="field field-textarea" id="customGridContainer" style="display:none;">
                         <span>Grille custom</span>
-                        <textarea id="sudokuGridInput" rows="9" style="display:none;">0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0</textarea>
+                        <textarea id="sudokuGridInput" rows="9">
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+                            0 0 0 0 0 0 0 0 0
+</textarea>
                     </label>
                 </div>
 
@@ -130,61 +132,74 @@
                 </section>
 
                 <section class="panel-card benchmark-panel" id="benchmarkPanel" style="display:none;">
-                    <div class="panel-head">
-                        <div>
-                            <h2>Benchmarks</h2>
-                            <p>Mesures locales pour comparer les solveurs.</p>
-                        </div>
-                    </div>
-                    <div class="bench-tabs">
-                        <select id="benchTabSelect" class="bench-dropdown">
-                            <option value="queens">Benchmark N-Reines</option>
-                            <option value="sudoku">Benchmark Sudoku</option>
-                        </select>
-                    </div>
+                    <table class="benchmark-layout">
+                        <thead>
+                            <tr>
+                                <th class="benchmark-layout-header">Benchmark</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="bench-tabs">
+                                        <select id="benchTabSelect" class="bench-dropdown">
+                                            <option value="queens">Benchmark N-Reines</option>
+                                            <option value="sudoku">Benchmark Sudoku</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="bench-tab-content" id="benchQueens">
+                                        <div class="bench-table-container bench-table-small">
+                                            <table class="bench-table" id="benchQueensTable">
+                                                <thead>
+                                                    <tr><th>N</th><th>Succes %</th><th>Temps (ms)</th><th>Etapes</th></tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="bench-status" id="benchQueensStatus">Pret</div>
+                                    </div>
 
-                    <div class="bench-tab-content" id="benchQueens">
-                        <div class="bench-table-container">
-                            <table class="bench-table" id="benchQueensTable">
-                                <thead>
-                                    <tr><th>N</th><th>Succes %</th><th>Temps (ms)</th><th>Etapes</th></tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <div class="bench-status" id="benchQueensStatus">Pret</div>
-                    </div>
-
-                    <div class="bench-tab-content" id="benchSudoku" style="display:none;">
-                        <div class="bench-method-select">
-                            <label for="benchSudokuMethod">Methode</label>
-                            <select id="benchSudokuMethod">
-                                <option value="backtrack">Solveur Pro</option>
-                                <option value="minconf">Min-Conflit</option>
-                            </select>
-                            <button id="runSudokuBenchBtn" class="ghost-button compact-button" type="button">Lancer</button>
-                        </div>
-                        <div class="bench-table-container">
-                            <table class="bench-table" id="benchSudokuTable">
-                                <thead>
-                                    <tr><th>Difficulte</th><th>Resolu</th><th>Temps (ms)</th><th>Etapes</th></tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                        <div class="bench-status" id="benchSudokuStatus">Pret</div>
-                    </div>
-
-                    <div class="loader3d" id="benchLoader" style="display:none;">
-                        <div class="cube">
-                            <div class="face front"></div>
-                            <div class="face back"></div>
-                            <div class="face left"></div>
-                            <div class="face right"></div>
-                            <div class="face top"></div>
-                            <div class="face bottom"></div>
-                        </div>
-                    </div>
+                                    <div class="bench-tab-content" id="benchSudoku" style="display:none;">
+                                        <div class="bench-method-select">
+                                            <label for="benchSudokuMethod">Methode</label>
+                                            <select id="benchSudokuMethod">
+                                                <option value="backtrack">Solveur Pro</option>
+                                                <option value="minconf">Min-Conflit</option>
+                                            </select>
+                                            <button id="runSudokuBenchBtn" class="ghost-button compact-button" type="button">Lancer</button>
+                                        </div>
+                                        <div class="bench-table-container bench-table-small">
+                                            <table class="bench-table" id="benchSudokuTable">
+                                                <thead>
+                                                    <tr><th>Difficulte</th><th>Resolu</th><th>Temps (ms)</th><th>Etapes</th></tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="bench-status" id="benchSudokuStatus">Pret</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="loader3d" id="benchLoader" style="display:none;">
+                                        <div class="cube">
+                                            <div class="face front"></div>
+                                            <div class="face back"></div>
+                                            <div class="face left"></div>
+                                            <div class="face right"></div>
+                                            <div class="face top"></div>
+                                            <div class="face bottom"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
             </aside>
 
